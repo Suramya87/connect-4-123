@@ -1,9 +1,9 @@
-#pragma once 
+#pragma once
 #include "Game.h"
+#include <vector>
+#include <string>
 
-// Header for connect 4 game 
-
-// Game class
+// Header for Connect 4 game
 
 class Connect_4 : public Game {
 public:
@@ -37,16 +37,15 @@ private:
     Bit*        PieceForPlayer(int playerNumber);
     Player*     ownerAt(int index) const;
 
-    // AI helpers
-    bool        dropPiece(int column, int player);
-    bool        checkWin(const std::string& state, int player) const;
-    int         evaluateState(const std::string& state, int player) const;
-    std::vector<int> getValidMoves(const std::string& state) const;
-
-    int         negamax(std::string& state, int depth, int playerColor);
+    // AI helpers using your existing naming
+    bool        dropPiece(int column, int player);                   // make a move in a column
+    void        undoPiece(std::string &state, int column);          // undo a move in a column
+    bool        checkWin(const std::string &state, int player) const; // check if a player wins
+    int         evaluateState(const std::string &state, int player) const; // evaluate board
+    std::vector<int> getValidMoves(const std::string &state) const; // list of playable columns
+    int         negamax(std::string &state, int depth, int playerColor); // recursive AI
 
     Grid*       _grid;
     int         _maxDepth = 6;
+    bool        _gameOver = false;
 };
-
-
