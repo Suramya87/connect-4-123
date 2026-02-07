@@ -64,7 +64,13 @@ namespace ClassGame {
                 } else {
                     ImGui::Text("Current Player Number: %d", game->getCurrentPlayer()->playerNumber());
                     ImGui::Text("Current Board State: %s", game->stateString().c_str());
+
+                    if (dynamic_cast<Connect_4*>(game)) {
+                    Connect_4* c4 = static_cast<Connect_4*>(game);
+                    ImGui::Text("AI Debug Info:");
+                    ImGui::Text("%s", c4->getDebugInfo().c_str());
                 }
+                                }
                 ImGui::End();
 
                 ImGui::Begin("GameWindow");

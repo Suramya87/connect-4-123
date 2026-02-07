@@ -2,11 +2,23 @@
 #include "Game.h"
 #include <vector>
 #include <string>
+// #include <intrin.h>
+#include <bit>
+
+
 
 // Header for Connect 4 game
+// enum class GameMode {
+//     PlayerVsPlayer,
+//     PlayerVsAI,
+//     AIvsAI
+// };
 
 class Connect_4 : public Game {
 public:
+
+    std::string getDebugInfo() const { return _debugInfo; }
+    std::string _debugInfo;
     Connect_4();
     ~Connect_4();
 
@@ -34,18 +46,41 @@ public:
     Grid*       getGrid() override { return _grid; }
 
 private:
+    // GameMode _gameMode = GameMode::PlayerVsAI;
+    // bool _humanGoesFirst = true;
+    // bool _isAnimating = false;
+
+
+    static constexpr int HUMAN_PLAYER = 0;
+    static constexpr int AI_PLAYER = 1;
     Bit*        PieceForPlayer(int playerNumber);
     Player*     ownerAt(int index) const;
 
     // AI helpers using your existing naming
     bool        dropPiece(int column, int player);                   // make a move in a column
+    // bool Connect_4::dropPieceReal(int column, int player);
+    void        dropPieceSim(std::string &state, int column, int player);
+
     void        undoPiece(std::string &state, int column);          // undo a move in a column
-    bool        checkWin(const std::string &state, int player) const; // check if a player wins
-    int         evaluateState(const std::string &state, int player) const; // evaluate board
+
+    // ------------- these i used when i was still using strings but i am just keeping them around in comments for now 
+    // bool        checkWin(const std::string &state, int player) const; // check if a player wins
+    // int         evaluateState(const std::string &state, int player) const; // evaluate board
+    // bool        isPlayable(const std::string &state, int r, int c) const;
     std::vector<int> getValidMoves(const std::string &state) const; // list of playable columns
-    int         negamax(std::string &state, int depth, int playerColor); // recursive AI
+    int         negamax(std::string &state,int depth,int alpha,int beta,int player); // recursive AI
+
+    // Bit board implementation
+    uint64_t _bitboard[2];  // [0] = human pieces, [1] = AI pieces
+    void stateToBitboards(const std::string &state, uint64_t bb[2]) const;
+    bool checkWinBitboard(uint64_t board) const;
+    int evaluateBitboard(uint64_t myBoard, uint64_t oppBoard) const;
+    // void animateDrop(Bit* bit, ChessSquare* targetSquare);
+    // void onDropFinished();
+
 
     Grid*       _grid;
-    int         _maxDepth = 6;
+    int         _maxDepth = 10;
     bool        _gameOver = false;
+
 };
