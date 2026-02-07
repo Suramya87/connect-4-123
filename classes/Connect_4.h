@@ -4,15 +4,16 @@
 #include <string>
 // #include <intrin.h>
 #include <bit>
+#include <vector>
 
 
 
 // Header for Connect 4 game
-// enum class GameMode {
-//     PlayerVsPlayer,
-//     PlayerVsAI,
-//     AIvsAI
-// };
+enum class GameMode {
+    PlayerVsPlayer,
+    PlayerVsAI,
+    AIvsAI
+};
 
 class Connect_4 : public Game {
 public:
@@ -21,6 +22,14 @@ public:
     std::string _debugInfo;
     Connect_4();
     ~Connect_4();
+
+
+    void animateDrop(Bit* bit, ChessSquare* targetSquare);
+    void onDropFinished();
+
+
+    void setGameMode(GameMode mode);
+    void setHumanFirst(bool first);
 
     static constexpr int ROWS = 6;
     static constexpr int COLS = 7;
@@ -46,9 +55,13 @@ public:
     Grid*       getGrid() override { return _grid; }
 
 private:
-    // GameMode _gameMode = GameMode::PlayerVsAI;
-    // bool _humanGoesFirst = true;
-    // bool _isAnimating = false;
+    GameMode _gameMode = GameMode::PlayerVsAI;
+    bool _humanGoesFirst = true;
+    bool _isAnimating = false;
+    Bit* _droppingBit = nullptr;
+    Vector2 _dropTargetPos;
+    float _dropSpeed = 1200.0f; // pixels per second
+
 
 
     static constexpr int HUMAN_PLAYER = 0;
@@ -75,12 +88,12 @@ private:
     void stateToBitboards(const std::string &state, uint64_t bb[2]) const;
     bool checkWinBitboard(uint64_t board) const;
     int evaluateBitboard(uint64_t myBoard, uint64_t oppBoard) const;
-    // void animateDrop(Bit* bit, ChessSquare* targetSquare);
-    // void onDropFinished();
+    void animateDrop(Bit* bit, ChessSquare* targetSquare);
+    void onDropFinished();
 
 
     Grid*       _grid;
-    int         _maxDepth = 10;
+    int         _maxDepth = 5;
     bool        _gameOver = false;
 
 };

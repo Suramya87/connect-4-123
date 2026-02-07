@@ -28,14 +28,29 @@ Bit* Connect_4::PieceForPlayer(const int playerNumber)
 void Connect_4::setUpBoard()
 {
     _gameOver = false;
-    setNumberOfPlayers(2);
-    _gameOptions.rowX = COLS;
-    _gameOptions.rowY = ROWS;
+    _isAnimating = false;
 
+    setNumberOfPlayers(2);
     _grid->initializeSquares(80, "square.png");
 
-    if (gameHasAI()) {
+    // Configure AI based on game mode
+    switch (_gameMode) {
+    case GameMode::PlayerVsPlayer:
+        break;
+
+    case GameMode::PlayerVsAI:
         setAIPlayer(AI_PLAYER);
+        break;
+
+    case GameMode::AIvsAI:
+        setAIPlayer(0);
+        setAIPlayer(1);
+        break;
+    }
+
+    // Who starts?
+    if (_gameMode == GameMode::PlayerVsAI && !_humanGoesFirst) {
+        setStartingPlayer(AI_PLAYER);
     }
 
     startGame();
@@ -44,8 +59,11 @@ void Connect_4::setUpBoard()
 
 bool Connect_4::actionForEmptyHolder(BitHolder& holder)
 {
-    if (_gameOver)
+
+    
+    if (_gameOver || _isAnimating)
         return false;
+
 
     int clickedColumn = -1;
 
@@ -68,16 +86,22 @@ bool Connect_4::actionForEmptyHolder(BitHolder& holder)
                     : AI_PLAYER
             );
 
-            bit->setPosition(square->getPosition());
-            square->setBit(bit);
+            // bit->setPosition(square->getPosition());
+            // square->setBit(bit);
 
-            if (checkForWinner() || checkForDraw()) {
-                _gameOver = true;   // lock the game
-                endTurn();          // engine prints correct winner
-                return true;
-            }
+            // if (checkForWinner() || checkForDraw()) {
+            //     _gameOver = true;   // lock the game
+            //     endTurn();          // engine prints correct winner
+            //     return true;
+            // }
 
-            endTurn();
+            // endTurn();
+            dropPiece(clickedColumn,
+                getCurrentPlayer()->playerNumber() == 0
+                    ? HUMAN_PLAYER + 1
+                    : AI_PLAYER + 1
+            );
+
             return true;
         }
     }
@@ -243,8 +267,17 @@ bool Connect_4::dropPiece(int column, int player) {
         ChessSquare* square = _grid->getSquare(column, row);
         if (!square->bit()) {
             Bit* bit = PieceForPlayer(player - 1);
-            bit->setPosition(square->getPosition());
+            // bit->setPosition(square->getPosition());
+            // square->setBit(bit);
+
+            bit->setPosition({
+                square->getPosition().x,
+                square->getPosition().y + 400
+            });
+
             square->setBit(bit);
+            animateDrop(bit, square);
+
             return true;
         }
     }
@@ -844,4 +877,47 @@ void Connect_4::updateAI()
         
         _debugInfo += "ERROR: Could not place piece!\n";
     }
+}
+void Connect_4::animateDrop(Bit* bit, ChessSquare* targetSquare)
+{
+    _isAnimating = true;
+
+    Vector2 startPos = bit->getPosition();
+    Vector2 endPos = targetSquare->getPosition();
+
+    bit->runAction(
+        Sequence::create(
+            MoveTo::create(0.25f, endPos),
+            CallFunc::create([this]() { onDropFinished(); }),
+            nullptr
+        )
+    );
+}
+
+void Connect_4::onDropFinished()
+{
+    _isAnimating = false;
+
+    if (checkForWinner() || checkForDraw()) {
+        _gameOver = true;
+        return;
+    }
+
+    endTurn();
+
+    if (getCurrentPlayer()->isAIPlayer()) {
+        updateAI();
+    }
+}
+
+
+
+void Connect_4::setGameMode(GameMode mode)
+{
+    _gameMode = mode;
+}
+
+void Connect_4::setHumanFirst(bool first)
+{
+    _humanGoesFirst = first;
 }
