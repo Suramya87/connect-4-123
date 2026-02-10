@@ -2,17 +2,10 @@
 #include "Game.h"
 #include <vector>
 #include <string>
-// #include <intrin.h>
 #include <bit>
 
 
 
-// Header for Connect 4 game
-// enum class GameMode {
-//     PlayerVsPlayer,
-//     PlayerVsAI,
-//     AIvsAI
-// };
 
 class Connect_4 : public Game {
 public:
@@ -44,11 +37,10 @@ public:
     bool        gameHasAI() override { return true; }
 
     Grid*       getGrid() override { return _grid; }
+    void setAIGoesFirst(bool goesFirst) { _aiGoesFirst = goesFirst; }
 
 private:
-    // GameMode _gameMode = GameMode::PlayerVsAI;
-    // bool _humanGoesFirst = true;
-    // bool _isAnimating = false;
+    bool _aiGoesFirst = false;
 
 
     static constexpr int HUMAN_PLAYER = 0;
@@ -75,6 +67,11 @@ private:
     void stateToBitboards(const std::string &state, uint64_t bb[2]) const;
     bool checkWinBitboard(uint64_t board) const;
     int evaluateBitboard(uint64_t myBoard, uint64_t oppBoard) const;
+
+    int getAIPlayerNumber() const { return _aiGoesFirst ? 0 : 1; }
+    int getHumanPlayerNumber() const { return _aiGoesFirst ? 1 : 0; }
+
+    // void setAIGoesFirst(bool goesFirst) { _aiGoesFirst = goesFirst; }
     // void animateDrop(Bit* bit, ChessSquare* targetSquare);
     // void onDropFinished();
 

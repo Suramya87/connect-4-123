@@ -20,8 +20,10 @@ Connect_4::~Connect_4()
 Bit* Connect_4::PieceForPlayer(const int playerNumber)
 {
     Bit* bit = new Bit();
-    bit->LoadTextureFromFile(playerNumber == AI_PLAYER ? "yellow.png" : "red.png");
-    bit->setOwner(getPlayerAt(playerNumber == AI_PLAYER ? 1 : 0));
+    // bit->LoadTextureFromFile(playerNumber == AI_PLAYER ? "yellow.png" : "red.png");
+    // bit->setOwner(getPlayerAt(playerNumber == AI_PLAYER ? 1 : 0));
+    bit->LoadTextureFromFile(playerNumber == 0 ? "red.png" : "yellow.png");
+    bit->setOwner(getPlayerAt(playerNumber));
     return bit;
 }
 
@@ -35,12 +37,55 @@ void Connect_4::setUpBoard()
     _grid->initializeSquares(80, "square.png");
 
     if (gameHasAI()) {
-        setAIPlayer(AI_PLAYER);
+        setAIPlayer(_aiGoesFirst ? 0 : 1);
     }
 
     startGame();
 }
 
+
+// bool Connect_4::actionForEmptyHolder(BitHolder& holder)
+// {
+//     if (_gameOver)
+//         return false;
+
+//     int clickedColumn = -1;
+
+//     _grid->forEachSquare([&](ChessSquare* square, int x, int y) {
+//         if (square == &holder) {
+//             clickedColumn = x;
+//         }
+//     });
+
+//     if (clickedColumn < 0)
+//         return false;
+
+//     for (int row = ROWS - 1; row >= 0; row--) {
+//         ChessSquare* square = _grid->getSquare(clickedColumn, row);
+//         if (!square->bit()) {
+
+//             Bit* bit = PieceForPlayer(
+//                 getCurrentPlayer()->playerNumber() == 0
+//                     ? HUMAN_PLAYER
+//                     : AI_PLAYER
+//             );
+
+//             bit->setPosition(square->getPosition());
+//             square->setBit(bit);
+
+//             if (checkForWinner() || checkForDraw()) {
+//                 _gameOver = true;   // lock the game
+//                 endTurn();          // engine prints correct winner
+//                 return true;
+//             }
+
+//             endTurn();
+//             return true;
+//         }
+//     }
+
+//     return false;
+// }
 
 bool Connect_4::actionForEmptyHolder(BitHolder& holder)
 {
@@ -61,19 +106,15 @@ bool Connect_4::actionForEmptyHolder(BitHolder& holder)
     for (int row = ROWS - 1; row >= 0; row--) {
         ChessSquare* square = _grid->getSquare(clickedColumn, row);
         if (!square->bit()) {
-
-            Bit* bit = PieceForPlayer(
-                getCurrentPlayer()->playerNumber() == 0
-                    ? HUMAN_PLAYER
-                    : AI_PLAYER
-            );
-
+            // Just use the current player's number directly
+            Bit* bit = PieceForPlayer(getCurrentPlayer()->playerNumber());
+            
             bit->setPosition(square->getPosition());
             square->setBit(bit);
 
             if (checkForWinner() || checkForDraw()) {
-                _gameOver = true;   // lock the game
-                endTurn();          // engine prints correct winner
+                _gameOver = true;
+                endTurn();
                 return true;
             }
 
@@ -827,7 +868,7 @@ void Connect_4::updateAI()
         for (int row = ROWS - 1; row >= 0; row--) {
             ChessSquare* square = _grid->getSquare(bestCol, row);
             if (square && !square->bit()) {
-                Bit* bit = PieceForPlayer(AI_PLAYER);
+                Bit* bit = PieceForPlayer(getCurrentPlayer()->playerNumber());
                 bit->setPosition(square->getPosition());
                 square->setBit(bit);
                 
