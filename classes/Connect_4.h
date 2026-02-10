@@ -80,7 +80,7 @@ private:
 
 
     Grid*       _grid;
-    int         _maxDepth = 10;
+    int         _maxDepth = 5;
     bool        _gameOver = false;
 
 };
