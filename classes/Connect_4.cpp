@@ -354,41 +354,6 @@ int Connect_4::evaluateBitboard(uint64_t myBoard, uint64_t oppBoard) const
 
 
 
-// int Connect_4::negamax(std::string &state, int depth, int alpha, int beta, int player)
-// {
-//     int opponent = (player == AI_PLAYER + 1) ? HUMAN_PLAYER + 1 : AI_PLAYER + 1;
-    
-//     // Convert to bitboards once
-//     uint64_t bb[2];
-//     stateToBitboards(state, bb);
-//     int myIdx = (player == AI_PLAYER + 1) ? 1 : 0;
-//     int oppIdx = 1 - myIdx;
-
-//     // Terminal checks with bitboards
-//     if (checkWinBitboard(bb[myIdx]))
-//         return 100000 - (_maxDepth - depth);
-//     if (checkWinBitboard(bb[oppIdx]))
-//         return -100000 + (_maxDepth - depth);
-    
-//     std::vector<int> moves = getValidMoves(state);
-//     if (depth == 0 || moves.empty())
-//         return evaluateBitboard(bb[myIdx], bb[oppIdx]);
-
-//     int bestVal = -1000000;
-    
-//     for (int col : moves) {
-//         dropPieceSim(state, col, player);
-//         int val = -negamax(state, depth - 1, -beta, -alpha, opponent);
-//         undoPiece(state, col);
-
-//         bestVal = std::max(bestVal, val);
-//         alpha = std::max(alpha, val);
-//         if (alpha >= beta) break;
-//     }
-
-//     return bestVal;
-// }
-
 int Connect_4::negamax(std::string &state, int depth, int alpha, int beta, int player)
 {
     int opponent = (player == AI_PLAYER + 1) ? HUMAN_PLAYER + 1 : AI_PLAYER + 1;
