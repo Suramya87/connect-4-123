@@ -80,4 +80,4 @@ private:
     int         _maxDepth = 5;
     bool        _gameOver = false;
 
-};
+};      
