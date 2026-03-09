@@ -7,6 +7,7 @@ static const int COLS = 7;
 Connect_4::Connect_4()
 {
     _grid = new Grid(COLS, ROWS);
+    _aiEnabled = true; 
 }
 
 Connect_4::~Connect_4()
@@ -38,6 +39,10 @@ void Connect_4::setUpBoard()
 
     if (gameHasAI()) {
         setAIPlayer(_aiGoesFirst ? 0 : 1);
+    } else {
+        for (int i = 0; i < 2; i++) {
+            _players.at(i)->setAIPlayer(false);
+        }
     }
 
     startGame();
@@ -49,8 +54,10 @@ bool Connect_4::actionForEmptyHolder(BitHolder& holder)
     if (_gameOver)
         return false;
 
-    int clickedColumn = -1;
+    if (gameHasAI() && getCurrentPlayer()->isAIPlayer())
+        return false;
 
+    int clickedColumn = -1;
     _grid->forEachSquare([&](ChessSquare* square, int x, int y) {
         if (square == &holder) {
             clickedColumn = x;
@@ -63,7 +70,6 @@ bool Connect_4::actionForEmptyHolder(BitHolder& holder)
     for (int row = ROWS - 1; row >= 0; row--) {
         ChessSquare* square = _grid->getSquare(clickedColumn, row);
         if (!square->bit()) {
-            // Just use the current player's number directly
             Bit* bit = PieceForPlayer(getCurrentPlayer()->playerNumber());
             
             bit->setPosition(square->getPosition());
@@ -71,11 +77,9 @@ bool Connect_4::actionForEmptyHolder(BitHolder& holder)
 
             if (checkForWinner() || checkForDraw()) {
                 _gameOver = true;
-                endTurn();
-                return true;
             }
 
-            endTurn();
+            endTurn(); 
             return true;
         }
     }
@@ -392,7 +396,12 @@ int Connect_4::negamax(std::string &state, int depth, int alpha, int beta, int p
 
 void Connect_4::updateAI()
 {
-    if (_gameOver) return;
+
+    if (_gameOver || !gameHasAI() || !getCurrentPlayer()->isAIPlayer()) {
+        return;
+    }
+
+    // if (_gameOver) return;
     
     if (!getCurrentPlayer()->isAIPlayer()) {
         _debugInfo = "Not AI's turn yet. Current player: " + std::to_string(getCurrentPlayer()->playerNumber()) + "\n";
@@ -415,16 +424,15 @@ void Connect_4::updateAI()
         _debugInfo += "\n";
     }
     
-    // Convert to bitboards for faster checks
     uint64_t bb[2];
     stateToBitboards(state, bb);
     
-    bool aiWon = checkWinBitboard(bb[1]);  // AI is index 1
-    bool humanWon = checkWinBitboard(bb[0]);  // Human is index 0
+    bool aiWon = checkWinBitboard(bb[1]);  
+    bool humanWon = checkWinBitboard(bb[0]);  
     _debugInfo += "AI won check: " + std::to_string(aiWon) + "\n";
     _debugInfo += "Human won check: " + std::to_string(humanWon) + "\n";
     
-    int evalScore = evaluateBitboard(bb[1], bb[0]);  // AI vs Human
+    int evalScore = evaluateBitboard(bb[1], bb[0]);  
     _debugInfo += "Base eval score: " + std::to_string(evalScore) + "\n";
     
     std::vector<int> validMoves = getValidMoves(state);
@@ -437,7 +445,6 @@ void Connect_4::updateAI()
     int bestCol = -1;
     int bestScore = -100000000;
     
-    // Evaluate each move using negamax
     for (int col : validMoves) {
         std::string temp = state;
         
@@ -454,18 +461,16 @@ void Connect_4::updateAI()
             _debugInfo += "\n";
         }
         
-        // Check for immediate win using bitboards
         uint64_t tempBB[2];
         stateToBitboards(temp, tempBB);
         
-        if (checkWinBitboard(tempBB[1])) {  // AI wins
+        if (checkWinBitboard(tempBB[1])) {  
             _debugInfo += "THIS IS A WINNING MOVE!\n";
             bestCol = col;
             bestScore = 100000;
             break;
         }
         
-        // Check if human can win on next turn
         for (int testCol : getValidMoves(temp)) {
             std::string test2 = temp;
             dropPieceSim(test2, testCol, HUMAN_PLAYER + 1);
@@ -478,7 +483,6 @@ void Connect_4::updateAI()
             }
         }
         
-        // Use negamax to evaluate this position
         int score = -negamax(
             temp,
             _maxDepth - 1,
@@ -489,7 +493,6 @@ void Connect_4::updateAI()
         
         _debugInfo += "Negamax score: " + std::to_string(score) + "\n";
         
-        // Also show simple eval for comparison
         int simpleEval = evaluateBitboard(tempBB[1], tempBB[0]);
         _debugInfo += "Simple eval: " + std::to_string(simpleEval) + "\n\n";
         

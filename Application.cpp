@@ -61,17 +61,25 @@ namespace ClassGame {
                     // game = new Connect_4();
                     // game->setUpBoard();
 
-                    static bool aiGoesFirst = false;
-    
-                    if (ImGui::Button("Start Connect-4")) {
-                        game = new Connect_4();
-                        static_cast<Connect_4*>(game)->setAIGoesFirst(aiGoesFirst);
-                        game->setUpBoard();
-                    }
-                    
-                    ImGui::SameLine();
-                    ImGui::Checkbox("AI Goes First", &aiGoesFirst);
-                // }
+                    static bool useAI = true;        // New toggle
+                        static bool aiGoesFirst = false;
+
+                        if (ImGui::Button("Start Connect-4")) {
+                            Connect_4* c4 = new Connect_4();
+                            c4->setAIEnabled(useAI);      // Tell the game if we want AI
+                            c4->setAIGoesFirst(aiGoesFirst);
+                            game = c4;
+                            game->setUpBoard();
+                        }
+                        
+                        ImGui::SameLine();
+                        ImGui::Checkbox("Use AI", &useAI);
+
+                        if (useAI) {
+                            ImGui::SameLine();
+                            ImGui::Checkbox("AI Goes First", &aiGoesFirst);
+                        }
+
                 } else {
                     ImGui::Text("Current Player Number: %d", game->getCurrentPlayer()->playerNumber());
                     ImGui::Text("Current Board State: %s", game->stateString().c_str());
