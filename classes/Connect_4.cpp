@@ -40,9 +40,8 @@ void Connect_4::setUpBoard()
     if (gameHasAI()) {
         setAIPlayer(_aiGoesFirst ? 0 : 1);
     } else {
-        for (int i = 0; i < 2; i++) {
-            _players.at(i)->setAIPlayer(false);
-        }
+        _players.at(0)->setAIPlayer(false);
+        _players.at(1)->setAIPlayer(false);
     }
 
     startGame();
